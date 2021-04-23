@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBCStateMachine", "BBCState
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBCStateMachine.GraphCompiler", "BBCStateMachine.GraphCompiler\BBCStateMachine.GraphCompiler.csproj", "{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBCStateMachine.Tests", "BBCStateMachine.Tests\BBCStateMachine.Tests.csproj", "{445E0A19-07A6-45C2-A507-9EE4C0543051}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}.Release|Any CPU.Build.0 = Release|Any CPU
+		{445E0A19-07A6-45C2-A507-9EE4C0543051}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{445E0A19-07A6-45C2-A507-9EE4C0543051}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{445E0A19-07A6-45C2-A507-9EE4C0543051}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{445E0A19-07A6-45C2-A507-9EE4C0543051}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
