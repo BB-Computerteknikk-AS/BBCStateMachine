@@ -30,18 +30,21 @@ namespace no.bbc.StateMachine
 
             var builder = _stateMachine.Builder;
 
-            builder.IfState(GarageDoorState.Opening).
-                GotAction(GarageDoorAction.Open).
-                TransitionTo(GarageDoorState.Stopped).
-                Build();
+            builder
+                .IfState(GarageDoorState.Opening)
+                .GotAction(GarageDoorAction.Open)
+                .TransitionTo(GarageDoorState.Stopped)
+                .Build();
 
-            builder.IfState(GarageDoorState.Opening).
-                GotAction(GarageDoorAction.Close).
-                TransitionTo(GarageDoorState.Closing)
+            builder
+                .IfState(GarageDoorState.Opening)
+                .GotAction(GarageDoorAction.Close)
+                .TransitionTo(GarageDoorState.Closing)
                 .Execute(OnStartedClosing)
                 .Build();
 
-            builder.IfState(GarageDoorState.Opening)
+            builder
+                .IfState(GarageDoorState.Opening)
                 .GotAction(GarageDoorAction.OnOpened)
                 .TransitionTo(GarageDoorState.Opened)
                 .Execute(OnOpened)
