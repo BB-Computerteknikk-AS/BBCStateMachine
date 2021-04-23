@@ -55,7 +55,7 @@ namespace no.bbc.StateMachine
         private Dictionary<Tuple<STATE_T, INPUT_T>, STATE_T> _transitionTable = new();
 
         private Dictionary<STATE_T, OnStateEnterDelegate> _onEnterActions = new();
-        private Dictionary<Tuple<STATE_T, INPUT_T>, Action> _onTransitionActions = new();
+        private Dictionary<Tuple<STATE_T, INPUT_T>, Action<StateMachine<STATE_T, INPUT_T>>> _onTransitionActions = new();
         private StateMachineBuilder<STATE_T, INPUT_T> _builder;
 
         #endregion
@@ -211,7 +211,7 @@ namespace no.bbc.StateMachine
                 if (_onTransitionActions.ContainsKey(key))
                 {
                     var transitionAction = _onTransitionActions[key];
-                    transitionAction?.Invoke();
+                    transitionAction?.Invoke(this);
                 }
 
                 OnStateChanged?.Invoke(prevState, newState, input);
@@ -236,7 +236,7 @@ namespace no.bbc.StateMachine
         /// <param name="state"></param>
         /// <param name="input"></param>
         /// <param name="action"></param>
-        public void OnTransition(STATE_T state, INPUT_T input, Action action)
+        public void OnTransition(STATE_T state, INPUT_T input, Action<StateMachine<STATE_T, INPUT_T>> action)
         {
             var transitionKey = Tuple.Create(state, input);
 

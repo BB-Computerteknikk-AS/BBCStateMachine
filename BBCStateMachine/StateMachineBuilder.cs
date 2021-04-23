@@ -21,9 +21,9 @@ namespace no.bbc.StateMachine
 
         #endregion
 
-        #region Public Properties
+        #region Internal Properties
 
-        public StateMachine<STATE_T, INPUT_T> Machine
+        internal StateMachine<STATE_T, INPUT_T> Machine
         {
             get
             {
@@ -64,9 +64,9 @@ namespace no.bbc.StateMachine
 
         #endregion
 
-        #region Public Properties
+        #region Internal Properties
 
-        public StateMachineBuilder<STATE_T, INPUT_T> StateMachineBuilder
+        internal StateMachineBuilder<STATE_T, INPUT_T> StateMachineBuilder
         {
             get
             {
@@ -74,7 +74,7 @@ namespace no.bbc.StateMachine
             }
         }
 
-        public STATE_T State
+        internal STATE_T State
         {
             get
             {
@@ -115,9 +115,9 @@ namespace no.bbc.StateMachine
 
         #endregion
 
-        #region Public Properties
+        #region Internal Properties
 
-        public IfStateBuilder<STATE_T, INPUT_T> IfStateBuilder
+        internal IfStateBuilder<STATE_T, INPUT_T> IfStateBuilder
         {
             get
             {
@@ -125,7 +125,7 @@ namespace no.bbc.StateMachine
             }
         }
 
-        public INPUT_T Action
+        internal INPUT_T Action
         {
             get
             {
@@ -153,13 +153,13 @@ namespace no.bbc.StateMachine
 
         private OnActionBuilder<STATE_T, INPUT_T> _onActionBuilder;
         private STATE_T _newState;
-        private Action _transitionAction;
+        private Action<StateMachine<STATE_T, INPUT_T>> _transitionAction;
 
         #endregion
 
-        #region Public Properties
+        #region Internal Properties
 
-        public OnActionBuilder<STATE_T, INPUT_T> OnActionBuilder
+        internal OnActionBuilder<STATE_T, INPUT_T> OnActionBuilder
         {
             get
             {
@@ -167,7 +167,7 @@ namespace no.bbc.StateMachine
             }
         }
 
-        public STATE_T NewState
+        internal STATE_T NewState
         {
             get
             {
@@ -189,7 +189,7 @@ namespace no.bbc.StateMachine
 
         #region Public Methods
 
-        public TransitionToBuilder<STATE_T, INPUT_T> Execute(Action action)
+        public TransitionToBuilder<STATE_T, INPUT_T> Execute(Action<StateMachine<STATE_T, INPUT_T>> action)
         {
             _transitionAction = action;
             return this;
