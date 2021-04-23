@@ -22,21 +22,19 @@ namespace no.bbc.StateMachine
             }
 
             _logger.Info("Initializing");
+
             if (!typeof(STATE_T).IsEnum)
             {
                 throw new ArgumentException("expected an enum, but got " + typeof(STATE_T).Name, nameof(STATE_T));
             }
-
 
             if (!typeof(INPUT_T).IsEnum)
             {
                 throw new ArgumentException("expected an enum, but got " + typeof(INPUT_T).Name, nameof(INPUT_T));
             }
 
-
             CurrentState = initialState;
         }
-
 
         ~StateMachine()
         {
