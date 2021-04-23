@@ -22,14 +22,14 @@ namespace no.bbc.StateMachine
         }
 
         /// <summary>
-        /// Tests the stack machine using the GarageDoorController
+        /// Tests the state machine using the GarageDoorController
         /// 1. Opens the doors
         /// 2. Waits for the doors to be fully opened
         /// 3. Closes the doors
         /// 4. Waits for the doors to be fully closed
         /// </summary>
         [Fact(DisplayName = "Test State Machine Functionality")]
-        public void TestStackMachine()
+        public void TestStateMachine()
         {
             AutoResetEvent doorsOpenedHandle = new AutoResetEvent(false);
             AutoResetEvent doorsClosedHandle = new AutoResetEvent(false);
@@ -53,6 +53,20 @@ namespace no.bbc.StateMachine
             garageDoorController.CloseDoors();
 
             doorsClosedHandle.WaitOne(3000);
+        }
+
+        [Fact(DisplayName = "Test Unhandled Transition")]
+        public void TestUnhandledTransition()
+        {
+            try
+            {
+                var garageDoorController = new GarageDoorController();
+                garageDoorController._stateMachine.HandleInput(GarageDoorController.GarageDoorAction.OnOpened);
+            }
+            catch (ArgumentException ex)
+            {
+
+            }
         }
 
         /// <summary>
