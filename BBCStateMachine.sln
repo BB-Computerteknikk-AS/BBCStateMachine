@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.809.6
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBCStateMachine", "BBCStateMachine.csproj", "{699A56FC-5637-4052-88C8-40113ED34619}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBCStateMachine", "BBCStateMachine\BBCStateMachine.csproj", "{B4676F66-7091-4DA8-A928-593DEB61D587}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BBCStateMachine.GraphCompiler", "BBCStateMachine.GraphCompiler\BBCStateMachine.GraphCompiler.csproj", "{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{699A56FC-5637-4052-88C8-40113ED34619}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{699A56FC-5637-4052-88C8-40113ED34619}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{699A56FC-5637-4052-88C8-40113ED34619}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{699A56FC-5637-4052-88C8-40113ED34619}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4676F66-7091-4DA8-A928-593DEB61D587}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4676F66-7091-4DA8-A928-593DEB61D587}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4676F66-7091-4DA8-A928-593DEB61D587}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4676F66-7091-4DA8-A928-593DEB61D587}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED9E8CDF-64C0-4D4F-B93B-AC03ADFA3053}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
