@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove=".gitignore" />
+    <None Remove="LICENSE" />
+    <None Remove="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="StateMachineGraphCompiler.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="4.7.9" />
+  </ItemGroup>
+</Project>
