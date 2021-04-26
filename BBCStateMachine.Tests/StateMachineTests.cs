@@ -71,7 +71,7 @@ namespace no.bbc.StateMachine
             PrinterStateMachine.Builder
                 .IfState(PrinterState.Connecting)
                 .GotInput(PrinterInput.NotFound)
-                .TransitionTo(PrinterState.Connecting)
+                .TransitionTo(PrinterState.Disconnected)
                 .Build();
 
             PrinterStateMachine.Builder
@@ -151,10 +151,16 @@ namespace no.bbc.StateMachine
             // The printer was not found
             PrinterStateMachine.HandleInput(PrinterInput.NotFound);
 
-            Assert.True(PrinterStateMachine.CurrentState == PrinterState.Connecting);
+            Assert.True(PrinterStateMachine.CurrentState == PrinterState.Disconnected);
 
             // Try again
+            PrinterStateMachine.HandleInput(PrinterInput.Connect);
+
+            Assert.True(PrinterStateMachine.CurrentState == PrinterState.Connecting);
+
             PrinterStateMachine.HandleInput(PrinterInput.WaitForPrint);
+
+            Assert.True(PrinterStateMachine.CurrentState == PrinterState.WaitingForPrint);
 
             // We're connected
             PrinterStateMachine.HandleInput(PrinterInput.PrintData);
