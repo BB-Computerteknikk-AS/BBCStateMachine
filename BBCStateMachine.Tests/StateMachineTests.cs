@@ -127,11 +127,21 @@ namespace no.bbc.StateMachine
                 })
                 .Build();
 
-            // autoResetEvent.Set();
+            try
+            {
+                // attempt to trigger a transition that is not handled
+                PrinterStateMachine.HandleInput(PrinterInput.PaperJammed);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                // we expect to get an error
+                Assert.NotNull(ex);
+            }
 
             // Handle the initial state change, starting our state machine
             PrinterStateMachine.HandleInput(PrinterInput.Connect);
 
+            // autoResetEvent.Set();
             autoResetEvent.WaitOne(10000);
         }
     }

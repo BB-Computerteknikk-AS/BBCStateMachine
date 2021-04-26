@@ -214,7 +214,7 @@ namespace no.bbc.StateMachine
                 {
                     var error = $"No transition registered from state: '{CurrentState}' with input: '{input}'";
                     _logger.Error(error);
-                    throw new ArgumentException(error);
+                    throw new ArgumentOutOfRangeException(error);
                 }
 
                 var prevState = CurrentState;
