@@ -4,6 +4,10 @@ A simple yet powerful state machine implementation in C#
 
 [![.NET](https://github.com/BB-Computerteknikk-AS/BBCStateMachine/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BB-Computerteknikk-AS/BBCStateMachine/actions/workflows/dotnet.yml)
 
+The package is available on NuGet
+https://www.nuget.org/packages/BBCStateMachine/ (Core Library)
+https://www.nuget.org/packages/BBCStateMachine.GraphCompiler/ (DOT Graph Compiler)
+
 BBCStateMachine lets you describe state machines of any complexity using a fluent interface (whose design relies extensively on method chaining).
 
 Here's an example of a describing a **Printer State Machine** using BBCStateMachine's fluent syntax.
