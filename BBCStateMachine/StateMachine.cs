@@ -41,6 +41,9 @@ namespace no.bbc.StateMachine
             _onEnterActions.Clear();
             _onEnterActions = null;
 
+            _onExitActions.Clear();
+            _onExitActions = null;
+
             _onTransitionActions.Clear();
             _onTransitionActions = null;
         }
@@ -52,8 +55,10 @@ namespace no.bbc.StateMachine
         private NLog.Logger _logger;
         private Dictionary<Tuple<STATE_T, INPUT_T>, STATE_T> _transitionTable = new();
 
-        private Dictionary<STATE_T, OnStateEnterDelegate> _onEnterActions = new();
-        private Dictionary<Tuple<STATE_T, INPUT_T>, Action<StateMachine<STATE_T, INPUT_T>>> _onTransitionActions = new();
+        private Dictionary<STATE_T, OnStateDelegate> _onEnterActions = new();
+        private Dictionary<STATE_T, OnStateDelegate> _onExitActions = new();
+
+        private Dictionary<Tuple<STATE_T, INPUT_T>, OnStateDelegate> _onTransitionActions = new();
         private StateMachineBuilder<STATE_T, INPUT_T> _builder;
 
         #endregion
@@ -82,7 +87,7 @@ namespace no.bbc.StateMachine
         {
             get
             {
-                if(_builder == null)
+                if (_builder == null)
                 {
                     _builder = new StateMachineBuilder<STATE_T, INPUT_T>(this);
                 }
@@ -95,13 +100,13 @@ namespace no.bbc.StateMachine
 
         #region Public Delegates
 
-        public delegate void OnStateEnterDelegate(STATE_T prevState, STATE_T newState, INPUT_T action); 
+        public delegate void OnStateDelegate(StateMachine<STATE_T, INPUT_T> sender, STATE_T prevState, STATE_T newState, INPUT_T input);
 
         #endregion
 
-        #region Public Methods
+        #region Internal Methods
 
-        public void RegisterTransition(STATE_T state, INPUT_T input, STATE_T output)
+        internal void RegisterTransition(STATE_T state, INPUT_T input, STATE_T output)
         {
             var transitionKey = Tuple.Create(state, input);
 
@@ -114,6 +119,32 @@ namespace no.bbc.StateMachine
 
             _logger.Info($"Registered Transition: '{state}' + '{input}' = '{output}'");
         }
+
+        internal void SetOnEnterStateAction(STATE_T state, OnStateDelegate action)
+        {
+            _onEnterActions[state] = action;
+        }
+
+        internal void SetOnExitStateAction(STATE_T state, OnStateDelegate action)
+        {
+            _onExitActions[state] = action;
+        }
+
+        internal void SetOnTransitionAction(STATE_T state, INPUT_T input, OnStateDelegate action)
+        {
+            var transitionKey = Tuple.Create(state, input);
+
+            if (_onTransitionActions.ContainsKey(transitionKey))
+            {
+                throw new ArgumentOutOfRangeException("Cannot register duplicate transitions handlers");
+            }
+
+            _onTransitionActions[transitionKey] = action;
+        }
+
+        #endregion
+
+        #region Public Methods
 
         public IEnumerable<StateMachineTransition<STATE_T, INPUT_T>> GetPossibleTransitions()
         {
@@ -183,7 +214,7 @@ namespace no.bbc.StateMachine
         {
             lock (this)
             {
-                // we conbine the state and input, and check the transition table
+                // we combine the state and input, and check the transition table
                 var key = Tuple.Create(CurrentState, input);
 
                 if (!_transitionTable.ContainsKey(key))
@@ -200,57 +231,31 @@ namespace no.bbc.StateMachine
 
                 _logger.Info($"Transition - '{prevState}' + '{input}' = '{CurrentState}'");
 
-                if (_onEnterActions.ContainsKey(newState))
+                // OnEnter
+                if (_onExitActions.ContainsKey(newState))
                 {
-                    var enterAction = _onEnterActions[newState];
-                    enterAction?.Invoke(prevState, newState, input);
+                    _onEnterActions[newState].Invoke(this, prevState, newState, input);
                 }
 
+                // Transition Action
                 if (_onTransitionActions.ContainsKey(key))
                 {
-                    var transitionAction = _onTransitionActions[key];
-                    transitionAction?.Invoke(this);
+                    _onTransitionActions[key].Invoke(this, prevState, newState, input);
                 }
 
+                // Invoke OnStateChanged
                 OnStateChanged?.Invoke(prevState, newState, input);
+
+                // OnExit
+                if (_onExitActions.ContainsKey(newState))
+                {
+                    _onExitActions[newState].Invoke(this, prevState, newState, input);
+                }
 
                 return CurrentState;
             }
         }
 
-        /// <summary>
-        /// Listen for a transition to a new state, ignoring the input
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        public void OnEnterState(STATE_T state, OnStateEnterDelegate action)
-        {
-            _onEnterActions[state] = action;
-        }
-
-        /// <summary>
-        /// Listen for a transition to a new state with a specific input
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="input"></param>
-        /// <param name="action"></param>
-        public void OnTransition(STATE_T state, INPUT_T input, Action<StateMachine<STATE_T, INPUT_T>> action)
-        {
-            var transitionKey = Tuple.Create(state, input);
-
-            if (_onTransitionActions.ContainsKey(transitionKey))
-            {
-                throw new ArgumentOutOfRangeException("Cannot register duplicate transitions handlers");
-            }
-
-            _onTransitionActions[transitionKey] = action;
-        }
-
-        #endregion
-
-        #region Public Static Methods
-
-
-        #endregion
+        #endregion 
     }
 }

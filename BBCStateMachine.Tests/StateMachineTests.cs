@@ -21,17 +21,61 @@ namespace no.bbc.StateMachine
             LogManager.Configuration = config;
         }
 
-        /// <summary>
-        /// Tests the state machine using the GarageDoorController
-        /// 1. Opens the doors
-        /// 2. Waits for the doors to be fully opened
-        /// 3. Closes the doors
-        /// 4. Waits for the doors to be fully closed
-        /// </summary>
+        enum PrinterState
+        {
+            Disconnected,
+            Disconnecting,
+            Connecting,
+            WaitingForPrint,
+            NotFound,
+            PrintingData,
+            PaperJammed,
+        }
+
+        enum PrinterAction
+        {
+            Connect,
+            WaitForPrint,
+            NotFound,
+            Disconnect,
+            Disconnected,
+            PrintData,
+            PaperJammed
+        }
+
         [Fact(DisplayName = "Test State Machine Functionality")]
         public void TestStateMachine()
         {
-            AutoResetEvent doorsOpenedHandle = new AutoResetEvent(false);
+            AutoResetEvent autoResetEvent = new AutoResetEvent(false);
+
+            var stateMachine = new StateMachine<PrinterState, PrinterAction>(PrinterState.Disconnected);
+
+            stateMachine.Builder
+                .IfState(PrinterState.Disconnected)
+                .GotInput(PrinterAction.Connect)
+                .TransitionTo(PrinterState.Connecting)
+                .OnEnter((sender, prevState, newState, input) =>
+                {
+                    Console.WriteLine("Entering state 'Connecting'");
+                })
+                .OnTransition((sender, prevState, newState, input) =>
+                {
+                    Console.WriteLine("OnTransition 'Connecting'");
+                })
+                .OnExit((sender, prevState, newState, input) =>
+                {
+                    Console.WriteLine("Exited state 'Connecting'");
+                })
+                .Build();
+
+
+            stateMachine.HandleInput(PrinterAction.Connect);
+
+
+            autoResetEvent.WaitOne(10000);
+
+
+            /*AutoResetEvent doorsOpenedHandle = new AutoResetEvent(false);
             AutoResetEvent doorsClosedHandle = new AutoResetEvent(false);
 
             var garageDoorController = new GarageDoorController();
@@ -52,21 +96,13 @@ namespace no.bbc.StateMachine
 
             garageDoorController.CloseDoors();
 
-            doorsClosedHandle.WaitOne(3000);
+            doorsClosedHandle.WaitOne(3000);*/
         }
 
         [Fact(DisplayName = "Test Unhandled Transition")]
         public void TestUnhandledTransition()
         {
-            try
-            {
-                var garageDoorController = new GarageDoorController();
-                garageDoorController._stateMachine.HandleInput(GarageDoorController.GarageDoorAction.OnOpened);
-            }
-            catch (ArgumentException ex)
-            {
-
-            }
+         
         }
 
         /// <summary>
@@ -75,7 +111,7 @@ namespace no.bbc.StateMachine
         [Fact(DisplayName = "Compile State Machine dot Graph")]
         public void CompileDotGraph()
         {
-            var garageDoorController = new GarageDoorController();
+          /*  var garageDoorController = new GarageDoorController();
 
             var possibleTransitions = garageDoorController._stateMachine.GetPossibleTransitions();
 
@@ -90,7 +126,7 @@ namespace no.bbc.StateMachine
             // results can be visualized here: http://graphviz.it
             Assert.NotNull(dotGraph);
 
-            Console.WriteLine(dotGraph);
+            Console.WriteLine(dotGraph);*/
         }
     }
 }

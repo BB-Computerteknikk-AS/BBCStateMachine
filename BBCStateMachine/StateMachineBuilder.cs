@@ -86,31 +86,31 @@ namespace no.bbc.StateMachine
 
         #region Public Methods
 
-        public OnActionBuilder<STATE_T, INPUT_T> GotAction(INPUT_T action)
+        public OnInputBuilder<STATE_T, INPUT_T> GotInput(INPUT_T input)
         {
-            return new OnActionBuilder<STATE_T, INPUT_T>(this, action);
+            return new OnInputBuilder<STATE_T, INPUT_T>(this, input);
         }
 
         #endregion
     }
 
-    public class OnActionBuilder<STATE_T, INPUT_T>
+    public class OnInputBuilder<STATE_T, INPUT_T>
                where STATE_T : struct, IConvertible
                where INPUT_T : struct, IConvertible
     {
         #region Private Fields
 
         private IfStateBuilder<STATE_T, INPUT_T> _ifStateBuilder;
-        private INPUT_T _action;
+        private INPUT_T _input;
 
         #endregion
 
         #region Public Constructor
 
-        public OnActionBuilder(IfStateBuilder<STATE_T, INPUT_T> ifStateBuilder, INPUT_T action)
+        public OnInputBuilder(IfStateBuilder<STATE_T, INPUT_T> ifStateBuilder, INPUT_T input)
         {
             _ifStateBuilder = ifStateBuilder;
-            _action = action;
+            _input = input;
         }
 
         #endregion
@@ -125,11 +125,11 @@ namespace no.bbc.StateMachine
             }
         }
 
-        internal INPUT_T Action
+        internal INPUT_T Input
         {
             get
             {
-                return _action;
+                return _input;
             }
         }
 
@@ -151,19 +151,21 @@ namespace no.bbc.StateMachine
     {
         #region Private Fields
 
-        private OnActionBuilder<STATE_T, INPUT_T> _onActionBuilder;
+        private OnInputBuilder<STATE_T, INPUT_T> _onInputBuilder;
         private STATE_T _newState;
-        private Action<StateMachine<STATE_T, INPUT_T>> _transitionAction;
+        private StateMachine<STATE_T, INPUT_T>.OnStateDelegate _onEnter;
+        private StateMachine<STATE_T, INPUT_T>.OnStateDelegate _onTransition;
+        private StateMachine<STATE_T, INPUT_T>.OnStateDelegate _onExit;
 
         #endregion
 
         #region Internal Properties
 
-        internal OnActionBuilder<STATE_T, INPUT_T> OnActionBuilder
+        internal OnInputBuilder<STATE_T, INPUT_T> OnInputBuilder
         {
             get
             {
-                return _onActionBuilder;
+                return _onInputBuilder;
             }
         }
 
@@ -179,38 +181,67 @@ namespace no.bbc.StateMachine
 
         #region Public Constructor
 
-        public TransitionToBuilder(OnActionBuilder<STATE_T, INPUT_T> onActionBuilder, STATE_T newState)
+        public TransitionToBuilder(OnInputBuilder<STATE_T, INPUT_T> onInputBuilder, STATE_T newState)
         {
-            _onActionBuilder = onActionBuilder;
+            _onInputBuilder = onInputBuilder;
             _newState = newState;
+        }
+
+        ~TransitionToBuilder()
+        {
+            _onExit = null;
+            _onTransition = null;
+            _onExit = null;
         }
 
         #endregion
 
         #region Public Methods
 
-        public TransitionToBuilder<STATE_T, INPUT_T> Execute(Action<StateMachine<STATE_T, INPUT_T>> action)
+        public TransitionToBuilder<STATE_T, INPUT_T> OnEnter(StateMachine<STATE_T, INPUT_T>.OnStateDelegate action)
         {
-            _transitionAction = action;
+            _onEnter = action;
+            return this;
+        }
+
+        public TransitionToBuilder<STATE_T, INPUT_T> OnExit(StateMachine<STATE_T, INPUT_T>.OnStateDelegate action)
+        {
+            _onExit = action;
+            return this;
+        }
+
+        public TransitionToBuilder<STATE_T, INPUT_T> OnTransition(StateMachine<STATE_T, INPUT_T>.OnStateDelegate action)
+        {
+            _onTransition = action;
             return this;
         }
 
         public StateMachineBuilder<STATE_T, INPUT_T> Build()
         {
-            var machine = OnActionBuilder.IfStateBuilder.StateMachineBuilder.Machine;
+            var machine = OnInputBuilder.IfStateBuilder.StateMachineBuilder.Machine;
 
-            var state = OnActionBuilder.IfStateBuilder.State;
-            var input = OnActionBuilder.Action;
+            var state = OnInputBuilder.IfStateBuilder.State;
+            var input = OnInputBuilder.Input;
             var output = NewState;
 
             machine.RegisterTransition(state, input, output);
 
-            if (_transitionAction != null)
+            if (_onEnter != null)
             {
-                machine.OnTransition(state, input, _transitionAction);
+                machine.SetOnEnterStateAction(state, _onEnter);
             }
-           
-            return OnActionBuilder.IfStateBuilder.StateMachineBuilder;
+
+            if (_onTransition != null)
+            {
+                machine.SetOnTransitionAction(state, input, _onTransition);
+            }
+
+            if(_onExit != null)
+            {
+                machine.SetOnExitStateAction(state, _onExit);
+            }
+
+            return OnInputBuilder.IfStateBuilder.StateMachineBuilder;
         }
 
         #endregion
