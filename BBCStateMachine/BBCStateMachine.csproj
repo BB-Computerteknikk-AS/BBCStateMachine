@@ -3,6 +3,17 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>no.bbc.StateMachine</RootNamespace>
+    <PackOnBuild>true</PackOnBuild>
+    <PackageVersion>1.0</PackageVersion>
+    <Authors>BB Computerteknikk AS</Authors>
+    <Copyright>BB Computerteknikk AS (BBC)</Copyright>
+    <PackageIconUrl>https://avatars.githubusercontent.com/u/83064469?s=200&amp;v=4</PackageIconUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/BB-Computerteknikk-AS/BBCStateMachine/main/LICENSE</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Owners>BB Computerteknikk AS (BBC)</Owners>
+    <PackageProjectUrl>https://github.com/BB-Computerteknikk-AS/BBCStateMachine</PackageProjectUrl>
+    <Title>BBCStateMachine</Title>
+    <Description>A simple yet powerful state machine implementation in C#</Description>
   </PropertyGroup>
 
   <ItemGroup>
