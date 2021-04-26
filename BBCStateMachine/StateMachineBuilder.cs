@@ -6,30 +6,18 @@ namespace no.bbc.StateMachine
             where STATE_T : struct, IConvertible
             where INPUT_T : struct, IConvertible
     {
-        #region Private Fields
-
-        private StateMachine<STATE_T, INPUT_T> _machine;
-
-        #endregion
-
         #region Public Constructor
 
         public StateMachineBuilder(StateMachine<STATE_T, INPUT_T> machine)
         {
-            _machine = machine;
+            Machine = machine;
         }
 
         #endregion
 
         #region Internal Properties
 
-        internal StateMachine<STATE_T, INPUT_T> Machine
-        {
-            get
-            {
-                return _machine;
-            }
-        }
+        internal StateMachine<STATE_T, INPUT_T> Machine { get; private set; }
 
         #endregion
 
@@ -47,40 +35,21 @@ namespace no.bbc.StateMachine
                where STATE_T : struct, IConvertible
                where INPUT_T : struct, IConvertible
     {
-        #region Private Fields
-
-        private StateMachineBuilder<STATE_T, INPUT_T> _stateMachineBuilder;
-        private STATE_T _state;
-
-        #endregion
-
         #region Public Constructor
 
         public IfStateBuilder(StateMachineBuilder<STATE_T, INPUT_T> stateMachineBuilder, STATE_T state)
         {
-            _stateMachineBuilder = stateMachineBuilder;
-            _state = state;
+            StateMachineBuilder = stateMachineBuilder;
+            State = state;
         }
 
         #endregion
 
         #region Internal Properties
 
-        internal StateMachineBuilder<STATE_T, INPUT_T> StateMachineBuilder
-        {
-            get
-            {
-                return _stateMachineBuilder;
-            }
-        }
+        internal StateMachineBuilder<STATE_T, INPUT_T> StateMachineBuilder { get; private set; }
 
-        internal STATE_T State
-        {
-            get
-            {
-                return _state;
-            }
-        }
+        internal STATE_T State { get; private set; }
 
         #endregion
 
@@ -91,6 +60,42 @@ namespace no.bbc.StateMachine
             return new OnInputBuilder<STATE_T, INPUT_T>(this, input);
         }
 
+        public OnEnterBuilder<STATE_T, INPUT_T> OnEnter(StateMachine<STATE_T, INPUT_T>.OnStateDelegate action)
+        {
+            return new OnEnterBuilder<STATE_T, INPUT_T>(this, action);
+        }
+
+        #endregion
+    }
+
+    public class OnEnterBuilder<STATE_T, INPUT_T>
+               where STATE_T : struct, IConvertible
+               where INPUT_T : struct, IConvertible
+    {
+        #region Public Constructor
+
+        public OnEnterBuilder(IfStateBuilder<STATE_T, INPUT_T> ifStateBuilder, StateMachine<STATE_T, INPUT_T>.OnStateDelegate action)
+        {
+            IfStateBuilder = ifStateBuilder;
+            Action = action;
+        }
+
+        #endregion
+
+        #region Internal Properties
+
+        internal IfStateBuilder<STATE_T, INPUT_T> IfStateBuilder { get; private set; }
+        internal StateMachine<STATE_T, INPUT_T>.OnStateDelegate Action { get; private set; }
+
+        #endregion
+
+        #region Public Methods
+
+        public void Build()
+        {
+            IfStateBuilder.StateMachineBuilder.Machine.SetOnEnterStateAction(IfStateBuilder.State, Action);
+        }
+
         #endregion
     }
 
@@ -98,40 +103,27 @@ namespace no.bbc.StateMachine
                where STATE_T : struct, IConvertible
                where INPUT_T : struct, IConvertible
     {
-        #region Private Fields
-
-        private IfStateBuilder<STATE_T, INPUT_T> _ifStateBuilder;
-        private INPUT_T _input;
-
-        #endregion
-
         #region Public Constructor
 
         public OnInputBuilder(IfStateBuilder<STATE_T, INPUT_T> ifStateBuilder, INPUT_T input)
         {
-            _ifStateBuilder = ifStateBuilder;
-            _input = input;
+            IfStateBuilder = ifStateBuilder;
+            Input = input;
+        }
+
+        public OnInputBuilder(OnEnterBuilder<STATE_T, INPUT_T> onEnterBuilder, INPUT_T input)
+        {
+            IfStateBuilder = onEnterBuilder.IfStateBuilder;
+            Input = input;
         }
 
         #endregion
 
         #region Internal Properties
 
-        internal IfStateBuilder<STATE_T, INPUT_T> IfStateBuilder
-        {
-            get
-            {
-                return _ifStateBuilder;
-            }
-        }
+        internal IfStateBuilder<STATE_T, INPUT_T> IfStateBuilder { get; private set; }
 
-        internal INPUT_T Input
-        {
-            get
-            {
-                return _input;
-            }
-        }
+        internal INPUT_T Input { get; private set; }
 
         #endregion
 
@@ -153,9 +145,7 @@ namespace no.bbc.StateMachine
 
         private OnInputBuilder<STATE_T, INPUT_T> _onInputBuilder;
         private STATE_T _newState;
-        private StateMachine<STATE_T, INPUT_T>.OnStateDelegate _onEnter;
         private StateMachine<STATE_T, INPUT_T>.OnStateDelegate _onTransition;
-        private StateMachine<STATE_T, INPUT_T>.OnStateDelegate _onExit;
 
         #endregion
 
@@ -189,26 +179,12 @@ namespace no.bbc.StateMachine
 
         ~TransitionToBuilder()
         {
-            _onExit = null;
             _onTransition = null;
-            _onExit = null;
         }
 
         #endregion
 
         #region Public Methods
-
-        public TransitionToBuilder<STATE_T, INPUT_T> OnEnter(StateMachine<STATE_T, INPUT_T>.OnStateDelegate action)
-        {
-            _onEnter = action;
-            return this;
-        }
-
-        public TransitionToBuilder<STATE_T, INPUT_T> OnExit(StateMachine<STATE_T, INPUT_T>.OnStateDelegate action)
-        {
-            _onExit = action;
-            return this;
-        }
 
         public TransitionToBuilder<STATE_T, INPUT_T> OnTransition(StateMachine<STATE_T, INPUT_T>.OnStateDelegate action)
         {
@@ -226,19 +202,9 @@ namespace no.bbc.StateMachine
 
             machine.RegisterTransition(state, input, output);
 
-            if (_onEnter != null)
-            {
-                machine.SetOnEnterStateAction(state, _onEnter);
-            }
-
             if (_onTransition != null)
             {
                 machine.SetOnTransitionAction(state, input, _onTransition);
-            }
-
-            if(_onExit != null)
-            {
-                machine.SetOnExitStateAction(state, _onExit);
             }
 
             return OnInputBuilder.IfStateBuilder.StateMachineBuilder;

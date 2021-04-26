@@ -32,7 +32,7 @@ namespace no.bbc.StateMachine
             {
                 throw new ArgumentException("expected an enum, but got " + typeof(INPUT_T).Name, nameof(INPUT_T));
             }
-
+             
             CurrentState = initialState;
         }
 
@@ -40,9 +40,6 @@ namespace no.bbc.StateMachine
         {
             _onEnterActions.Clear();
             _onEnterActions = null;
-
-            _onExitActions.Clear();
-            _onExitActions = null;
 
             _onTransitionActions.Clear();
             _onTransitionActions = null;
@@ -56,7 +53,6 @@ namespace no.bbc.StateMachine
         private Dictionary<Tuple<STATE_T, INPUT_T>, STATE_T> _transitionTable = new();
 
         private Dictionary<STATE_T, OnStateDelegate> _onEnterActions = new();
-        private Dictionary<STATE_T, OnStateDelegate> _onExitActions = new();
 
         private Dictionary<Tuple<STATE_T, INPUT_T>, OnStateDelegate> _onTransitionActions = new();
         private StateMachineBuilder<STATE_T, INPUT_T> _builder;
@@ -123,11 +119,6 @@ namespace no.bbc.StateMachine
         internal void SetOnEnterStateAction(STATE_T state, OnStateDelegate action)
         {
             _onEnterActions[state] = action;
-        }
-
-        internal void SetOnExitStateAction(STATE_T state, OnStateDelegate action)
-        {
-            _onExitActions[state] = action;
         }
 
         internal void SetOnTransitionAction(STATE_T state, INPUT_T input, OnStateDelegate action)
@@ -214,6 +205,8 @@ namespace no.bbc.StateMachine
         {
             lock (this)
             {
+                _logger.Info("Got Input: " + input);
+
                 // we combine the state and input, and check the transition table
                 var key = Tuple.Create(CurrentState, input);
 
@@ -232,7 +225,7 @@ namespace no.bbc.StateMachine
                 _logger.Info($"Transition - '{prevState}' + '{input}' = '{CurrentState}'");
 
                 // OnEnter
-                if (_onExitActions.ContainsKey(newState))
+                if (_onEnterActions.ContainsKey(newState))
                 {
                     _onEnterActions[newState].Invoke(this, prevState, newState, input);
                 }
@@ -245,12 +238,6 @@ namespace no.bbc.StateMachine
 
                 // Invoke OnStateChanged
                 OnStateChanged?.Invoke(prevState, newState, input);
-
-                // OnExit
-                if (_onExitActions.ContainsKey(newState))
-                {
-                    _onExitActions[newState].Invoke(this, prevState, newState, input);
-                }
 
                 return CurrentState;
             }

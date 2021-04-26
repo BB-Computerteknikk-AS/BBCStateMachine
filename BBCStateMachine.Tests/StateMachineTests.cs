@@ -19,9 +19,11 @@ namespace no.bbc.StateMachine
 
             // Apply config           
             LogManager.Configuration = config;
+
+            PrinterStateMachine = new StateMachine<PrinterState, PrinterInput>(PrinterState.Disconnected);
         }
 
-        enum PrinterState
+        public enum PrinterState
         {
             Disconnected,
             Disconnecting,
@@ -32,7 +34,7 @@ namespace no.bbc.StateMachine
             PaperJammed,
         }
 
-        enum PrinterAction
+        public enum PrinterInput
         {
             Connect,
             WaitForPrint,
@@ -43,90 +45,94 @@ namespace no.bbc.StateMachine
             PaperJammed
         }
 
-        [Fact(DisplayName = "Test State Machine Functionality")]
-        public void TestStateMachine()
+        private StateMachine<PrinterState, PrinterInput> PrinterStateMachine { get; set; }
+        private StateMachineGraphCompiler<PrinterState, PrinterInput> PrinterStateMachineGraphCompiler { get; set; }
+
+        [Fact(DisplayName = "Test State Machine")]
+        public void InitPrinterStateMachine()
         {
             AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
-            var stateMachine = new StateMachine<PrinterState, PrinterAction>(PrinterState.Disconnected);
+            // First we describe our state machine using a StateMachineBuilder, which is a fluent interface
+            PrinterStateMachine = new StateMachine<PrinterState, PrinterInput>(PrinterState.Disconnected);
 
-            stateMachine.Builder
+            string printedDocument = "";
+            var hasSimulatedPaperJam = false;
+
+            PrinterStateMachine.Builder
                 .IfState(PrinterState.Disconnected)
-                .GotInput(PrinterAction.Connect)
+                .GotInput(PrinterInput.Connect)
                 .TransitionTo(PrinterState.Connecting)
-                .OnEnter((sender, prevState, newState, input) =>
-                {
-                    Console.WriteLine("Entering state 'Connecting'");
-                })
                 .OnTransition((sender, prevState, newState, input) =>
                 {
-                    Console.WriteLine("OnTransition 'Connecting'");
-                })
-                .OnExit((sender, prevState, newState, input) =>
-                {
-                    Console.WriteLine("Exited state 'Connecting'");
+                    // simulate work, then transition to WaitForPrint
+                    Thread.Sleep(1000);
+                    sender.HandleInput(PrinterInput.WaitForPrint);
                 })
                 .Build();
 
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.Connecting)
+                .GotInput(PrinterInput.WaitForPrint)
+                .TransitionTo(PrinterState.WaitingForPrint)
+                .OnTransition((sender, prevState, newState, input) =>
+                {
+                    // simulate work
+                    Thread.Sleep(1000);
+                    sender.HandleInput(PrinterInput.PrintData);
+                })
+                .Build();
 
-            stateMachine.HandleInput(PrinterAction.Connect);
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.WaitingForPrint)
+                .GotInput(PrinterInput.PrintData)
+                .TransitionTo(PrinterState.PrintingData)
+                .OnTransition((sender, prevState, newState, input) =>
+                {
+                    // simulate work
+                    var print = "PRINT";
+                    Console.WriteLine("Printing " + print);
+                    Thread.Sleep(1000);
 
+                    printedDocument += print;
+                    sender.HandleInput(PrinterInput.WaitForPrint);
+
+                    if (!hasSimulatedPaperJam)
+                    {
+                        Thread.Sleep(500);
+                        sender.HandleInput(PrinterInput.PrintData);
+                        Thread.Sleep(500);
+                        sender.HandleInput(PrinterInput.PaperJammed);
+                    }
+                })
+                .Build();
+
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.PrintingData)
+                .GotInput(PrinterInput.WaitForPrint)
+                .TransitionTo(PrinterState.WaitingForPrint)
+                .OnTransition((sender, prevState, newState, input) =>
+                {
+                    Console.WriteLine("Finished printing, waiting for another print");
+                })
+                .Build();
+
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.PrintingData)
+                .GotInput(PrinterInput.PaperJammed)
+                .TransitionTo(PrinterState.PaperJammed)
+                .OnTransition((sender, prevState, newState, input) =>
+                {
+
+                })
+                .Build();
+
+            // autoResetEvent.Set();
+
+            // Handle the initial state change, starting our state machine
+            PrinterStateMachine.HandleInput(PrinterInput.Connect);
 
             autoResetEvent.WaitOne(10000);
-
-
-            /*AutoResetEvent doorsOpenedHandle = new AutoResetEvent(false);
-            AutoResetEvent doorsClosedHandle = new AutoResetEvent(false);
-
-            var garageDoorController = new GarageDoorController();
-
-            garageDoorController.OnDoorsOpened += () =>
-            {
-                doorsOpenedHandle.Set();
-            };
-
-            garageDoorController.OnDoorsClosed += () =>
-            {
-                doorsClosedHandle.Set();
-            };
-
-            garageDoorController.OpenDoors();
-
-            doorsOpenedHandle.WaitOne(3000);
-
-            garageDoorController.CloseDoors();
-
-            doorsClosedHandle.WaitOne(3000);*/
-        }
-
-        [Fact(DisplayName = "Test Unhandled Transition")]
-        public void TestUnhandledTransition()
-        {
-         
-        }
-
-        /// <summary>
-        /// Compile a dot graph for visual representation
-        /// </summary>
-        [Fact(DisplayName = "Compile State Machine dot Graph")]
-        public void CompileDotGraph()
-        {
-          /*  var garageDoorController = new GarageDoorController();
-
-            var possibleTransitions = garageDoorController._stateMachine.GetPossibleTransitions();
-
-            var unhandledTransitions = garageDoorController._stateMachine.GetUnhandledTransitions();
-
-            var unhandledInputs = garageDoorController._stateMachine.GetUnhandledInputs();
-
-            var dotGraph = garageDoorController.GraphCompiler.CompileDotGraph();
-
-            var dotGraphWithUnhandledTransitions = garageDoorController.GraphCompiler.CompileDotGraph(true);
-
-            // results can be visualized here: http://graphviz.it
-            Assert.NotNull(dotGraph);
-
-            Console.WriteLine(dotGraph);*/
         }
     }
 }
