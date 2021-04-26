@@ -51,98 +51,139 @@ namespace no.bbc.StateMachine
         [Fact(DisplayName = "Test State Machine")]
         public void InitPrinterStateMachine()
         {
-            AutoResetEvent autoResetEvent = new AutoResetEvent(false);
+            var disconnectedEvent = new AutoResetEvent(false);
 
             // First we describe our state machine using a StateMachineBuilder, which is a fluent interface
             PrinterStateMachine = new StateMachine<PrinterState, PrinterInput>(PrinterState.Disconnected);
 
-            string printedDocument = "";
-            var hasSimulatedPaperJam = false;
-
             PrinterStateMachine.Builder
                 .IfState(PrinterState.Disconnected)
                 .GotInput(PrinterInput.Connect)
-                .TransitionTo(PrinterState.Connecting)
-                .OnTransition((sender, prevState, newState, input) =>
-                {
-                    // simulate work, then transition to WaitForPrint
-                    Thread.Sleep(1000);
-                    sender.HandleInput(PrinterInput.WaitForPrint);
-                })
+                .TransitionTo(PrinterState.Connecting)               
                 .Build();
 
             PrinterStateMachine.Builder
                 .IfState(PrinterState.Connecting)
                 .GotInput(PrinterInput.WaitForPrint)
                 .TransitionTo(PrinterState.WaitingForPrint)
-                .OnTransition((sender, prevState, newState, input) =>
-                {
-                    // simulate work
-                    Thread.Sleep(1000);
-                    sender.HandleInput(PrinterInput.PrintData);
-                })
+                .Build();
+
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.Connecting)
+                .GotInput(PrinterInput.NotFound)
+                .TransitionTo(PrinterState.Connecting)
                 .Build();
 
             PrinterStateMachine.Builder
                 .IfState(PrinterState.WaitingForPrint)
                 .GotInput(PrinterInput.PrintData)
                 .TransitionTo(PrinterState.PrintingData)
-                .OnTransition((sender, prevState, newState, input) =>
-                {
-                    // simulate work
-                    var print = "PRINT";
-                    Console.WriteLine("Printing " + print);
-                    Thread.Sleep(1000);
-
-                    printedDocument += print;
-                    sender.HandleInput(PrinterInput.WaitForPrint);
-
-                    if (!hasSimulatedPaperJam)
-                    {
-                        Thread.Sleep(500);
-                        sender.HandleInput(PrinterInput.PrintData);
-                        Thread.Sleep(500);
-                        sender.HandleInput(PrinterInput.PaperJammed);
-                    }
-                })
                 .Build();
 
             PrinterStateMachine.Builder
                 .IfState(PrinterState.PrintingData)
                 .GotInput(PrinterInput.WaitForPrint)
                 .TransitionTo(PrinterState.WaitingForPrint)
-                .OnTransition((sender, prevState, newState, input) =>
-                {
-                    Console.WriteLine("Finished printing, waiting for another print");
-                })
                 .Build();
 
             PrinterStateMachine.Builder
                 .IfState(PrinterState.PrintingData)
                 .GotInput(PrinterInput.PaperJammed)
                 .TransitionTo(PrinterState.PaperJammed)
-                .OnTransition((sender, prevState, newState, input) =>
-                {
+                .Build();
 
-                })
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.PaperJammed)
+                .GotInput(PrinterInput.Disconnect)
+                .TransitionTo(PrinterState.Disconnecting)
+                .Build();
+
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.PaperJammed)
+                .GotInput(PrinterInput.Connect)
+                .TransitionTo(PrinterState.Connecting)
+                .Build();
+
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.PaperJammed)
+                .GotInput(PrinterInput.PrintData)
+                .TransitionTo(PrinterState.PrintingData)
+                .Build();
+
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.WaitingForPrint)
+                .GotInput(PrinterInput.Disconnect)
+                .TransitionTo(PrinterState.Disconnecting)
+                .Build();
+
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.PrintingData)
+                .GotInput(PrinterInput.Disconnect)
+                .TransitionTo(PrinterState.Disconnecting)
+                .Build();
+
+            PrinterStateMachine.Builder
+                .IfState(PrinterState.Disconnecting)
+                .GotInput(PrinterInput.Disconnected)
+                .TransitionTo(PrinterState.Disconnected)
+                 .OnTransition((sender, prevState, newState, input) =>
+                 {
+                     // execute an action on this transition
+                     disconnectedEvent.Set();
+                 })
                 .Build();
 
             try
             {
-                // attempt to trigger a transition that is not handled
+                // Attempt to trigger a transition that is not handled
                 PrinterStateMachine.HandleInput(PrinterInput.PaperJammed);
+                Assert.False(true);
             }
             catch (ArgumentOutOfRangeException ex)
             {
-                // we expect to get an error
+                // We expect to get an error because this is not a valid transition
                 Assert.NotNull(ex);
             }
 
             // Handle the initial state change, starting our state machine
             PrinterStateMachine.HandleInput(PrinterInput.Connect);
 
-            // autoResetEvent.Set();
-            autoResetEvent.WaitOne(10000);
+            // The printer was not found
+            PrinterStateMachine.HandleInput(PrinterInput.NotFound);
+
+            Assert.True(PrinterStateMachine.CurrentState == PrinterState.Connecting);
+
+            // Try again
+            PrinterStateMachine.HandleInput(PrinterInput.WaitForPrint);
+
+            // We're connected
+            PrinterStateMachine.HandleInput(PrinterInput.PrintData);
+
+            PrinterStateMachine.HandleInput(PrinterInput.PaperJammed);
+
+            PrinterStateMachine.HandleInput(PrinterInput.PrintData);
+
+            PrinterStateMachine.HandleInput(PrinterInput.Disconnect);
+
+            PrinterStateMachine.HandleInput(PrinterInput.Disconnected);
+
+            try
+            {
+                PrinterStateMachine.HandleInput(PrinterInput.PrintData);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                // Not possible, because the printer is disconnected
+                Assert.NotNull(ex);
+            }
+
+            var graphCompiler = new StateMachineGraphCompiler<PrinterState, PrinterInput>(PrinterStateMachine);
+            var graph = graphCompiler.CompileDotGraph();
+            // results can be visualized here: http://graphviz.it
+
+            Assert.NotEmpty(graph);
+
+            disconnectedEvent.WaitOne();
         }
     }
 }
