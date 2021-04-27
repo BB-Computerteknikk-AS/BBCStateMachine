@@ -23,6 +23,75 @@ namespace no.bbc.StateMachine
             PrinterStateMachine = new StateMachine<PrinterState, PrinterInput>(PrinterState.Disconnected);
         }
 
+        enum TurnstileState
+        {
+            Locked,
+            Unlocked
+        }
+
+        enum TurnstileInput
+        {
+            Push,
+            Coin
+        }
+
+        [Fact(DisplayName = "Simple Turnstile State Machine")]
+        public void TurnstileStateMachine()
+        {
+            var rnd = new Random();
+            var iterations = 100000; // 100k
+
+            var stateMachine = new StateMachine<TurnstileState, TurnstileInput>(TurnstileState.Locked);
+
+            stateMachine.Builder
+                .IfState(TurnstileState.Locked)
+                .GotInput(TurnstileInput.Coin)
+                .TransitionTo(TurnstileState.Unlocked)
+                .Build();
+
+            stateMachine.Builder
+                 .IfState(TurnstileState.Locked)
+                 .GotInput(TurnstileInput.Push)
+                 .TransitionTo(TurnstileState.Locked)
+                 .Build();
+
+            stateMachine.Builder
+                .IfState(TurnstileState.Unlocked)
+                .GotInput(TurnstileInput.Coin)
+                .TransitionTo(TurnstileState.Unlocked)
+                .Build();
+
+            stateMachine.Builder
+                .IfState(TurnstileState.Unlocked)
+                .GotInput(TurnstileInput.Push)
+                .TransitionTo(TurnstileState.Locked)
+                .Build();
+
+            var unhandledInputs = stateMachine.GetUnhandledInputs(); 
+
+            for (int i = 0; i < iterations; i++)
+            {
+                if (rnd.Next(0, 2) == 1)
+                {
+                    stateMachine.HandleInput(TurnstileInput.Coin);
+                }
+                else
+                {
+                    stateMachine.HandleInput(TurnstileInput.Push);
+                }
+            }
+
+            // we have handled all inputs
+            Assert.Empty(unhandledInputs);
+
+            var graphCompiler = new StateMachineGraphCompiler<TurnstileState, TurnstileInput>(stateMachine);
+
+            var graph = graphCompiler.CompileDotGraph();
+
+            // results can be visualized here: http://graphviz.it
+            Assert.NotEmpty(graph);
+        }
+
         public enum PrinterState
         {
             Disconnected,
@@ -46,7 +115,6 @@ namespace no.bbc.StateMachine
         }
 
         private StateMachine<PrinterState, PrinterInput> PrinterStateMachine { get; set; }
-        private StateMachineGraphCompiler<PrinterState, PrinterInput> PrinterStateMachineGraphCompiler { get; set; }
 
         [Fact(DisplayName = "Test State Machine")]
         public void InitPrinterStateMachine()
@@ -59,7 +127,7 @@ namespace no.bbc.StateMachine
             PrinterStateMachine.Builder
                 .IfState(PrinterState.Disconnected)
                 .GotInput(PrinterInput.Connect)
-                .TransitionTo(PrinterState.Connecting)               
+                .TransitionTo(PrinterState.Connecting)
                 .Build();
 
             PrinterStateMachine.Builder
