@@ -131,82 +131,81 @@ public enum PrinterInput
 var PrinterStateMachine = new StateMachine<PrinterState, PrinterInput>(PrinterState.Disconnected);
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.Disconnected)
-.GotInput(PrinterInput.Connect)
-.TransitionTo(PrinterState.Connecting)               
-.Build();
+    .IfState(PrinterState.Disconnected)
+    .GotInput(PrinterInput.Connect)
+    .TransitionTo(PrinterState.Connecting)               
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.Connecting)
-.GotInput(PrinterInput.WaitForPrint)
-.TransitionTo(PrinterState.WaitingForPrint)
-.Build();
+    .IfState(PrinterState.Connecting)
+    .GotInput(PrinterInput.WaitForPrint)
+    .TransitionTo(PrinterState.WaitingForPrint)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.Connecting)
-.GotInput(PrinterInput.NotFound)
-.TransitionTo(PrinterState.Disconnected)
-.Build();
+    .IfState(PrinterState.Connecting)
+    .GotInput(PrinterInput.NotFound)
+    .TransitionTo(PrinterState.Disconnected)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.WaitingForPrint)
-.GotInput(PrinterInput.PrintData)
-.TransitionTo(PrinterState.PrintingData)
-.Build();
+    .IfState(PrinterState.WaitingForPrint)
+    .GotInput(PrinterInput.PrintData)
+    .TransitionTo(PrinterState.PrintingData)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.PrintingData)
-.GotInput(PrinterInput.WaitForPrint)
-.TransitionTo(PrinterState.WaitingForPrint)
-.Build();
+    .IfState(PrinterState.PrintingData)
+    .GotInput(PrinterInput.WaitForPrint)
+    .TransitionTo(PrinterState.WaitingForPrint)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.PrintingData)
-.GotInput(PrinterInput.PaperJammed)
-.TransitionTo(PrinterState.PaperJammed)
-.Build();
+    .IfState(PrinterState.PrintingData)
+    .GotInput(PrinterInput.PaperJammed)
+    .TransitionTo(PrinterState.PaperJammed)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.PaperJammed)
-.GotInput(PrinterInput.Disconnect)
-.TransitionTo(PrinterState.Disconnecting)
-.Build();
+    .IfState(PrinterState.PaperJammed)
+    .GotInput(PrinterInput.Disconnect)
+    .TransitionTo(PrinterState.Disconnecting)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.PaperJammed)
-.GotInput(PrinterInput.Connect)
-.TransitionTo(PrinterState.Connecting)
-.Build();
+    .IfState(PrinterState.PaperJammed)
+    .GotInput(PrinterInput.Connect)
+    .TransitionTo(PrinterState.Connecting)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.PaperJammed)
-.GotInput(PrinterInput.PrintData)
-.TransitionTo(PrinterState.PrintingData)
-.Build();
+    .IfState(PrinterState.PaperJammed)
+    .GotInput(PrinterInput.PrintData)
+    .TransitionTo(PrinterState.PrintingData)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.WaitingForPrint)
-.GotInput(PrinterInput.Disconnect)
-.TransitionTo(PrinterState.Disconnecting)
-.Build();
+    .IfState(PrinterState.WaitingForPrint)
+    .GotInput(PrinterInput.Disconnect)
+    .TransitionTo(PrinterState.Disconnecting)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.PrintingData)
-.GotInput(PrinterInput.Disconnect)
-.TransitionTo(PrinterState.Disconnecting)
-.Build();
+    .IfState(PrinterState.PrintingData)
+    .GotInput(PrinterInput.Disconnect)
+    .TransitionTo(PrinterState.Disconnecting)
+    .Build();
 
 PrinterStateMachine.Builder
-.IfState(PrinterState.Disconnecting)
-.GotInput(PrinterInput.Disconnected)
-.TransitionTo(PrinterState.Disconnected)
-.OnTransition((sender, prevState, newState, input) =>
-{
-// execute an action on this transition
-})
-.Build();
+    .IfState(PrinterState.Disconnecting)
+    .GotInput(PrinterInput.Disconnected)
+    .TransitionTo(PrinterState.Disconnected)
+    .OnTransition((sender, prevState, newState, input) =>
+    {
+    // execute an action on this transition
+    })
+    .Build();
 ```
 
 ## Printer State Machine - DOT Graph
 ![Example](./docs/examples/graph.svg)
-
