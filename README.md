@@ -12,6 +12,28 @@ BBCStateMachine lets you describe state machines of any complexity using a fluen
 
 Here's an example of a describing a **Printer State Machine** using BBCStateMachine's fluent syntax.
 ```csharp
+public enum PrinterState
+{
+    Disconnected,
+    Disconnecting,
+    Connecting,
+    WaitingForPrint,
+    NotFound,
+    PrintingData,
+    PaperJammed,
+}
+
+public enum PrinterInput
+{
+    Connect,
+    WaitForPrint,
+    NotFound,
+    Disconnect,
+    Disconnected,
+    PrintData,
+    PaperJammed
+}
+
 var PrinterStateMachine = new StateMachine<PrinterState, PrinterInput>(PrinterState.Disconnected);
 
 PrinterStateMachine.Builder
