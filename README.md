@@ -13,7 +13,7 @@ BBCStateMachine lets you describe state machines of any complexity using a fluen
 
 ## Turnstile State Machine
 
-### Describing the Turnstile State Machine using using fluent syntax
+### Describing the Turnstile State Machine using fluent syntax
 
 ```csharp
 enum TurnstileState
