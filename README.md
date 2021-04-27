@@ -1,7 +1,5 @@
-
 # BBCStateMachine
 A simple yet powerful state machine implementation in C#
-
 [![.NET](https://github.com/BB-Computerteknikk-AS/BBCStateMachine/actions/workflows/dotnet.yml/badge.svg)](https://github.com/BB-Computerteknikk-AS/BBCStateMachine/actions/workflows/dotnet.yml)
 
 The package is available on NuGet
@@ -10,7 +8,100 @@ https://www.nuget.org/packages/BBCStateMachine.GraphCompiler/ (DOT Graph Compile
 
 BBCStateMachine lets you describe state machines of any complexity using a fluent interface (whose design relies extensively on method chaining).
 
-Here's an example of a describing a **Printer State Machine** using BBCStateMachine's fluent syntax.
+## Turnstile State Machine
+
+### Describing the Turnstile State Machine using using fluent syntax
+
+```csharp
+enum TurnstileState
+{
+    Locked,
+    Unlocked
+}
+
+enum TurnstileInput
+{
+    Push,
+    Coin
+}
+
+var stateMachine = new StateMachine<TurnstileState, TurnstileInput>(TurnstileState.Locked);
+
+stateMachine.Builder
+    .IfState(TurnstileState.Locked)
+    .GotInput(TurnstileInput.Coin)
+    .TransitionTo(TurnstileState.Unlocked)
+    .Build();
+
+stateMachine.Builder
+     .IfState(TurnstileState.Locked)
+     .GotInput(TurnstileInput.Push)
+     .TransitionTo(TurnstileState.Locked)
+     .Build();
+
+stateMachine.Builder
+    .IfState(TurnstileState.Unlocked)
+    .GotInput(TurnstileInput.Coin)
+    .TransitionTo(TurnstileState.Unlocked)
+    .Build();
+
+stateMachine.Builder
+    .IfState(TurnstileState.Unlocked)
+    .GotInput(TurnstileInput.Push)
+    .TransitionTo(TurnstileState.Locked)
+    .Build();
+```
+### Getting all possible transitions
+```csharp
+var possibleTransitions = stateMachine.GetPossibleTransitions(); 
+```
+### Getting a list of unhandled inputs
+```csharp
+var unhandledInputs = stateMachine.GetUnhandledInputs(); 
+```
+### Getting a list of unhandled transitions
+```csharp
+var unhandledTransitions = stateMachine.GetUnhandledTransitions(); 
+```
+### Manpipulating the Turnstile State Machine
+```csharp
+// transition to Unlocked if state is Locked
+stateMachine.HandleInput(TurnstileInput.Coin);
+// transition to Locked if state is Unlocked
+stateMachine.HandleInput(TurnstileInput.Push);
+```
+### Executing actions when a state is entered
+```csharp
+ stateMachine.Builder
+     .IfState(TurnstileState.Locked)
+     .OnEnter((sender, prevState, newState, input) =>
+     {
+         Console.WriteLine("Entered State Locked");
+     })
+     .Build();
+```
+### Executing actions on a specific transition
+```csharp
+stateMachine.Builder
+    .IfState(TurnstileState.Locked)
+    .GotInput(TurnstileInput.Coin)
+    .TransitionTo(TurnstileState.Unlocked)
+    .OnTransition((sender, prevState, newState, input) =>
+    {
+        Console.WriteLine("Executed on a specific transition");
+    })
+    .Build();
+```
+A **DOT graph** like the one below can be compiled using 
+```csharp
+var graphCompiler = new StateMachineGraphCompiler<TurnstileState, TurnstileInput>(stateMachine);
+var graph = graphCompiler.CompileDotGraph();
+// results can be visualized here: http://graphviz.it
+```
+![Example](./docs/examples/turnstile.svg)
+
+## Printer State Machine
+Here's a more advanced example describing a **Printer State Machine** using BBCStateMachine's fluent syntax.
 ```csharp
 public enum PrinterState
 {
@@ -113,11 +204,6 @@ PrinterStateMachine.Builder
 .Build();
 ```
 
-A DOT graph like the one below can be compiled using 
-```csharp
-var graphCompiler = new StateMachineGraphCompiler<PrinterState, PrinterInput>(PrinterStateMachine);
-var graph = graphCompiler.CompileDotGraph();
-// results can be visualized here: http://graphviz.it
-```
+## Printer State Machine - DOT Graph
 ![Example](./docs/examples/graph.svg)
 
