@@ -66,7 +66,7 @@ var unhandledInputs = stateMachine.GetUnhandledInputs();
 ```csharp
 var unhandledTransitions = stateMachine.GetUnhandledTransitions(); 
 ```
-### Manpipulating the Turnstile State Machine
+### Manipulating the Turnstile State Machine
 ```csharp
 // transition to Unlocked if state is Locked
 stateMachine.HandleInput(TurnstileInput.Coin);
