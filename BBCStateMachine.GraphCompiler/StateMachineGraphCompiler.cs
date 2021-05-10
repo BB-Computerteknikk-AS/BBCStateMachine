@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using DotNetGraph;
 using DotNetGraph.Compiler;
 using DotNetGraph.Edge;
@@ -46,12 +47,21 @@ namespace no.bbc.StateMachine
                 INPUT_T input = key.Item2;
                 STATE_T output = transitionTable[key];
 
+                bool isCurrentState = state.Equals(_stateMachine.CurrentState);
+
                 var stateNode = new DotNode(state.ToString())
                 {
                     Shape = DotNodeShape.Circle,
                     Label = state.ToString(),
                     Style = DotNodeStyle.Filled,                    
                 };
+               
+                if(isCurrentState)
+                {
+                    stateNode.FontColor = new DotNetGraph.Attributes.DotFontColorAttribute().Color = Color.White;
+                    stateNode.FillColor = new DotNetGraph.Attributes.DotFillColorAttribute().Color = Color.DarkGreen;
+                    stateNode.Height = new DotNetGraph.Attributes.DotNodeHeightAttribute(2f);
+                }
 
                 var outputNode = new DotNode(output.ToString())
                 {
@@ -63,6 +73,7 @@ namespace no.bbc.StateMachine
                 var inputNode = new DotEdge(stateNode, outputNode)
                 {
                     Label = input.ToString(),
+                    Style = isCurrentState ? new DotNetGraph.Attributes.DotEdgeStyleAttribute(DotEdgeStyle.Bold) : new DotNetGraph.Attributes.DotEdgeStyleAttribute(DotEdgeStyle.Solid)
                 };
 
                 handledTransitionsSubGraph.Elements.Add(stateNode);
