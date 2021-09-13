@@ -21,7 +21,7 @@ namespace no.bbc.StateMachine
                 _logger = NLog.LogManager.GetLogger(nameof(StateMachine));
             }
 
-            _logger.Info("Initializing");
+            _logger.Debug("Initializing");
 
             if (!typeof(STATE_T).IsEnum)
             {
@@ -113,7 +113,7 @@ namespace no.bbc.StateMachine
 
             _transitionTable[transitionKey] = output;
 
-            _logger.Info($"Registered Transition: '{state}' + '{input}' = '{output}'");
+            _logger.Debug($"Registered Transition: '{state}' + '{input}' = '{output}'");
         }
 
         internal void SetOnEnterStateAction(STATE_T state, OnStateDelegate action)
@@ -205,7 +205,7 @@ namespace no.bbc.StateMachine
         {
             lock (this)
             {
-                _logger.Info("Got Input: " + input);
+                _logger.Debug("Got Input: " + input);
 
                 // we combine the state and input, and check the transition table
                 var key = Tuple.Create(CurrentState, input);
@@ -222,7 +222,7 @@ namespace no.bbc.StateMachine
 
                 CurrentState = newState;
 
-                _logger.Info($"Transition - '{prevState}' + '{input}' = '{CurrentState}'");
+                _logger.Debug($"Transition - '{prevState}' + '{input}' = '{CurrentState}'");
 
                 // OnEnter
                 if (_onEnterActions.ContainsKey(newState))
