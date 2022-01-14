@@ -207,7 +207,7 @@ namespace no.bbc.StateMachine
                 PrinterStateMachine.HandleInput(PrinterInput.PaperJammed);
                 Assert.False(true);
             }
-            catch (ArgumentOutOfRangeException ex)
+            catch (StateMachineException ex)
             {
                 // We expect to get an error because this is not a valid transition
                 Assert.NotNull(ex);
