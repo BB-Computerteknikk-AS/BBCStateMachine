@@ -245,7 +245,7 @@ namespace no.bbc.StateMachine
             {
                 PrinterStateMachine.HandleInput(PrinterInput.PrintData);
             }
-            catch (ArgumentOutOfRangeException ex)
+            catch (StateMachineException ex)
             {
                 // Not possible, because the printer is disconnected
                 Assert.NotNull(ex);
