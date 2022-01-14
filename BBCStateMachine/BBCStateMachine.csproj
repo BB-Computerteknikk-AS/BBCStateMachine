@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>no.bbc.StateMachine</RootNamespace>
     <PackOnBuild>true</PackOnBuild>
-    <PackageVersion>1.1</PackageVersion>
+    <PackageVersion>1.1.2</PackageVersion>
     <Authors>BB Computerteknikk AS</Authors>
     <Copyright>BB Computerteknikk AS (BBC)</Copyright>
     <PackageIconUrl>https://avatars.githubusercontent.com/u/83064469?s=200&amp;v=4</PackageIconUrl>
