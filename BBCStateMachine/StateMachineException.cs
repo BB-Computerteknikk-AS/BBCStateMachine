@@ -6,15 +6,19 @@ namespace no.bbc.StateMachine
     {
         public enum StateMachineErrorCode
         {
+            Unknown,
             TransitionNotImplemented,
-            Unknown
+            DuplicateTransitionHandler,
+            DuplicateTransition
         }
 
-        public StateMachineException(StateMachineErrorCode errorCode, string? message) : base(message)
+        public StateMachineException(StateMachineErrorCode errorCode, string message = null) : base(message)
         {
             ErrorCode = errorCode;
         }
 
+        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public StateMachineErrorCode ErrorCode { get; private set; }
     }
 }

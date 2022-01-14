@@ -114,7 +114,7 @@ namespace no.bbc.StateMachine
 
             if (_transitionTable.ContainsKey(transitionKey))
             {
-                throw new ArgumentOutOfRangeException("Cannot register duplicate transitions");
+                throw new StateMachineException(StateMachineException.StateMachineErrorCode.DuplicateTransition);
             }
 
             _transitionTable[transitionKey] = output;
@@ -133,7 +133,7 @@ namespace no.bbc.StateMachine
 
             if (_onTransitionActions.ContainsKey(transitionKey))
             {
-                throw new ArgumentOutOfRangeException("Cannot register duplicate transitions handlers");
+                throw new StateMachineException(StateMachineException.StateMachineErrorCode.DuplicateTransitionHandler);
             }
 
             _onTransitionActions[transitionKey] = action;
@@ -143,6 +143,7 @@ namespace no.bbc.StateMachine
 
         #region Public Methods
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public IEnumerable<StateMachineTransition<STATE_T, INPUT_T>> GetPossibleTransitions()
         {
             // state -> input -> output
@@ -163,10 +164,10 @@ namespace no.bbc.StateMachine
                 }
             }
 
-            var registeredTransitions = _transitionTable.Select(x =>
+            /*var registeredTransitions = _transitionTable.Select(x =>
             {
                 return Tuple.Create(x.Key.Item1, x.Key.Item2, x.Value);
-            });
+            });*/
 
             return possibleTransitions;
         }
