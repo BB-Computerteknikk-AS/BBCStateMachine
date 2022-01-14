@@ -59,6 +59,12 @@ namespace no.bbc.StateMachine
 
         #endregion
 
+        #region Private Fields
+
+        private object _sync_lock = new object();
+
+        #endregion
+
         #region Public Delegates
 
         public delegate void OnStateChangedDelegate(STATE_T prevState, STATE_T newState, INPUT_T action);
@@ -203,7 +209,7 @@ namespace no.bbc.StateMachine
 
         public STATE_T HandleInput(INPUT_T input)
         {
-            lock (this)
+            lock (_sync_lock)
             {
                 _logger.Debug("Got Input: " + input);
 
@@ -212,9 +218,9 @@ namespace no.bbc.StateMachine
 
                 if (!_transitionTable.ContainsKey(key))
                 {
-                    var error = $"No transition registered from state: '{CurrentState}' with input: '{input}'";
-                    _logger.Error(error);
-                    throw new ArgumentOutOfRangeException(error);
+                    var errorMessage = $"No transition registered from state: '{CurrentState}' with input: '{input}'";
+                    _logger.Error(errorMessage);
+                    throw new StateMachineException(StateMachineException.StateMachineErrorCode.TransitionNotImplemented, errorMessage);                    
                 }
 
                 var prevState = CurrentState;

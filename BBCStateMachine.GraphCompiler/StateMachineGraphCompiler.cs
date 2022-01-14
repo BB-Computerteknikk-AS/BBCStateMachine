@@ -32,11 +32,11 @@ namespace no.bbc.StateMachine
         public string CompileDotGraph(bool includeUnhandledTransitions = false)
         {
             var graph = new DotGraph("MyGraph", true);
-
+            
             var handledTransitionsSubGraph = new DotSubGraph("cluster_0")
             {
                 Style = DotSubGraphStyle.Dashed,
-                Label = "Handled Transitions"
+                Label = "Handled Transitions",                
             };
 
             var transitionTable = _stateMachine.TransitionTable;
